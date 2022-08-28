@@ -1,0 +1,108 @@
+body {
+    background-image: url('assets/home.png');
+    background-repeat: no-repeat;
+    background-size: 100%;
+}
+
+.table {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.ancients-container {
+    display: flex;
+    flex-wrap: wrap;
+    width: 500px;
+}
+.ancient {
+    width: 220px;
+    margin: 10px;
+    cursor: pointer;
+}
+.ancient-active {
+    box-shadow: 0 0 40px 10px rgb(255, 77, 0);
+}
+
+.levels-container {
+    display: none;
+    flex-direction: column;
+}
+.level {
+    width: 110px;
+    height: 40px;
+    color: rgb(234, 131, 131);
+    background: none;
+    cursor: pointer;
+    margin-top: 10px;
+}
+.level-buton-active {
+    color: white;
+    background-color: rgb(103, 103, 103);
+}
+
+
+.decks-generation {
+    display: none;
+    align-items: center;
+    height: 40px;
+    margin-right: 100px;
+    color: rgb(234, 131, 131);
+    background: none;
+    cursor: pointer;
+
+}
+
+.decks {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    margin-right: 100px;
+}
+.counters {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+.stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 5px 0;
+}
+p {
+    color: rgb(234, 131, 131);
+    margin: 5px 0;
+}
+.counter-container {
+    display: flex;
+}
+.counter {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    margin: 0 5px;
+    text-align: center;
+    box-sizing: border-box;
+    padding-top: 4px;
+}
+.green {
+    background-color: rgb(101, 173, 101);
+}
+.brown {
+    background-color: rgb(191, 121, 77);
+}
+.blue {
+    background-color: rgb(138, 208, 222);
+}
+.mini-deck {
+    width: 180px;
+    margin: 10px 0;
+    cursor: pointer;
+}
+.card {
+    width: 220px;
+    margin: 10px 0;
+    margin-right: 10px;
+}
