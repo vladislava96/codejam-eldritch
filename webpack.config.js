@@ -11,15 +11,11 @@ module.exports = {
     path: path.resolve(__dirname, "dist"),
     clean: true,
   },
+  devServer: {
+    static: './dist',
+  },
   module: {
     rules: [
-      {
-        test: /\.(png|jpe?g|gif)$/i,
-        loader: "file-loader",
-        options: {
-          outputPath: 'images',
-        },
-      },
       {
         test: /\.css$/i,
         use: ["style-loader", "css-loader"],
