@@ -18,28 +18,13 @@ import greenCardsData from './data/mythicCards/green/index.js';
 
 
 miniDeck.src = cardBackground;
-let ancientСhosen;
-let levelСhosen;
-const ancients = [];
 
-let arrFirstStage = [];
-let arrSecondStage = [];
-let arrThirdStage = [];
+let ancientChosen;
+let levelChosen;
+const ancients = [];
 
 let arrStages = [];
 let currentStage = [];
-
-let levelGreenCards = [];
-let levelBrownCards = [];
-let levelBlueCards = [];
-
-let green;
-let brown;
-let blue;
-
-let dackAncientGreen = []; // всего зеленых у древнего
-let dackAncientBrown = []; // всего коричневых у древнего
-let dackAncientBlue = []; // всего голубых у древнего
 
 function createAncientCard(data) {
     const ancientCart = document.createElement('img');
@@ -48,6 +33,8 @@ function createAncientCard(data) {
     ancientCart.dataset.name = data.id;
     ancientCart.src = data.cardFace;
     ancientCart.alt = data.name;
+
+    ancientCart.addEventListener('click', onAncientClick);
 
     return ancientCart;
 }
@@ -58,54 +45,50 @@ for (const ancientData of ancientsData) {
     ancients.push(ancient);
 }
 
-ancientsContainer.addEventListener('click', (event) => {
+function onAncientClick(event) {
     for (let ancient of ancients) {
         ancient.classList.remove('ancient-active')
     }
     event.target.classList.add('ancient-active')
-    ancientСhosen = event.target.dataset.name
-    getAncient(ancientСhosen)
-    
+    ancientChosen = event.target.dataset.name
+    getAncient(ancientChosen)
+
     cardShown.style.display = 'none';
 
-    arrFirstStage = [];
-    arrSecondStage = [];
-    arrThirdStage = [];
-
-    if(levelСhosen != undefined && ancientСhosen != undefined) {
+    if (levelChosen != undefined && ancientChosen != undefined) {
         decksGenerationBtn.style.display = 'flex';
     }
-})
+}
 
-function getAncient(idСhosen) {
-    if(idСhosen != undefined) {
+function getAncient(idChosen) {
+    if (idChosen != undefined) {
         levelsContainer.style.display = 'flex';
-        console.log(idСhosen)
+        console.log(idChosen)
         decks.style.display = 'none';
-        counters.innerHTML = '';
-        for (let ancientData of ancientsData) {
-            if(ancientData.id !== idСhosen) {
-                continue
-            }
-            considerAncient(ancientData)
-        }
     }
 }
 
 levelsContainer.addEventListener('click', (event) => {
-    for (let level of levels) {
-        level.classList.remove('level-buton-active')
+    const target = event.target;
+
+    if ('BUTTON' != target.tagName) {
+        return;
     }
-    event.target.classList.add('level-buton-active')
-    levelСhosen = event.target.dataset.name
-    getLevel(levelСhosen)
+
+    for (let level of levels) {
+        level.classList.remove('level-button-active')
+    }
+
+    target.classList.add('level-button-active')
+    levelChosen = target.dataset.name
+    getLevel(levelChosen)
 
     levelsContainer.style.margin = '0';
     decksGenerationBtn.style.display = 'flex';
 })
 
 function getLevel(level) {
-    if(level != undefined) {
+    if (level != undefined) {
         decksGenerationBtn.style.display = 'flex';
         decks.style.display = 'none';
     }
@@ -114,11 +97,16 @@ function getLevel(level) {
 decksGenerationBtn.addEventListener('click', () => {
     decksGenerationBtn.style.display = 'none'
     decks.style.display = 'flex';
+    currentStage = [];
 
-    shuffleDeck(levelСhosen);
+    let ancientData = getAncientDataById(ancientChosen);
+    considerAncient(ancientData)
+
+    shuffleDeck(levelChosen);
 })
 
 function considerAncient(ancient) {
+    counters.innerHTML = '';
     createStage('I', ancient.firstStage);
     createStage('II', ancient.secondStage);
     createStage('III', ancient.thirdStage);
@@ -155,12 +143,12 @@ function createCounter(amount, color, container, number) {
 function findCards(level, cardsData) {
     let levelCards = [];
     for (let cardData of cardsData) {
-        if(cardData.difficulty !== level) {
+        if (cardData.difficulty !== level) {
             continue
         }
         levelCards.push(cardData)
-    }   
-    return (levelCards)   
+    }
+    return levelCards;
 }
 
 function findMissingCards(level, cardsData, number) {
@@ -169,94 +157,104 @@ function findMissingCards(level, cardsData, number) {
     let maxIndex = levelCards.length - 1;
 
     for (let cardData of cardsData) {
-        if(cardData.difficulty !== level) {
+        if (cardData.difficulty !== level) {
             continue
         }
         levelCards.push(cardData)
-    } 
+    }
     for (let i = 0; i < number; i++) {
         let randomIndex = getRandomNumber(0, maxIndex);
-        let сard = levelCards.splice(randomIndex, 1);
-        arrRandomIndex.push(...сard)
+        let card = levelCards.splice(randomIndex, 1);
+        arrRandomIndex.push(...card)
     }
-    
-    return (arrRandomIndex)   
+
+    return arrRandomIndex;
 }
 
 function countCards(cards) {
-    for (let ancientData of ancientsData) {
-        if(ancientData.id !== ancientСhosen) {
-            continue
-        }
-        return (ancientData.firstStage[cards] + ancientData.secondStage[cards] + ancientData.thirdStage[cards]); 
-    }
+    const ancientData = getAncientDataById(ancientChosen);
+
+    return ancientData.firstStage[cards] +
+        ancientData.secondStage[cards] +
+        ancientData.thirdStage[cards];
 }
 
 function getRandomNumber(min, max) {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
-function createDackAncient(colorCount, finalDeck, arr) {
+function createDeckAncient(colorCount, finalDeck) {
+    let newDeck = [];
+
     for (let i = 0; i < colorCount; i++) {
         let maxIndex = finalDeck.length - 1;
         let randomIndex = getRandomNumber(0, maxIndex);
-        let сard = finalDeck.splice(randomIndex, 1);
-        arr.push(...сard)
+        let card = finalDeck.splice(randomIndex, 1);
+        newDeck.push(...card)
     }
-}
-function createDackStage(stageCounterColor, dackColor, arrStage) {
-    for (let i = 0; i < stageCounterColor; i++) {
-        let maxIndex = dackColor - 1;
-        let randomIndex = getRandomNumber(0, maxIndex);
-        let сard = dackColor.splice(randomIndex, 1);
-        arrStage.push(...сard)
-    }
-}
-function createDeck() {
-    let ancientСhosenData;
 
+    return newDeck;
+}
+
+function getAncientDataById(id) {
     for (let ancientData of ancientsData) {
-        if(ancientData.id !== ancientСhosen) {
-            continue
+        if (ancientData.id === id) {
+            return ancientData;
         }
-        ancientСhosenData = ancientData
     }
 
-    let firstStageGreen = ancientСhosenData.firstStage.greenCards;
-    let firstStagBrown = ancientСhosenData.firstStage.brownCards;
-    let firstStageBlue = ancientСhosenData.firstStage.blueCards;
+    return null;
+}
 
-    let secondStageGreen = ancientСhosenData.secondStage.greenCards;
-    let secondStagBrown = ancientСhosenData.secondStage.brownCards;
-    let secondStageBlue = ancientСhosenData.secondStage.blueCards;
+function createDeck(colorDecks) {
+    const ancientChosenData = getAncientDataById(ancientChosen);
 
-    let thirdStageGreen = ancientСhosenData.thirdStage.greenCards;
-    let thirdStageBrown = ancientСhosenData.thirdStage.brownCards;
-    let thirdStageBlue = ancientСhosenData.thirdStage.blueCards;
-   
-    createDackStage(firstStageGreen, dackAncientGreen, arrFirstStage);
-    createDackStage(firstStagBrown, dackAncientBrown, arrFirstStage);
-    createDackStage(firstStageBlue, dackAncientBlue, arrFirstStage);
+    const arrFirstStage = createDeckStage(
+        ancientChosenData.firstStage,
+        colorDecks
+    );
 
-    createDackStage(secondStageGreen, dackAncientGreen, arrSecondStage);
-    createDackStage(secondStagBrown, dackAncientBrown, arrSecondStage);
-    createDackStage(secondStageBlue, dackAncientBlue, arrSecondStage);
+    const arrSecondStage = createDeckStage(
+        ancientChosenData.secondStage,
+        colorDecks
+    );
 
-    createDackStage(thirdStageGreen, dackAncientGreen, arrThirdStage);
-    createDackStage(thirdStageBrown, dackAncientBrown, arrThirdStage);
-    createDackStage(thirdStageBlue, dackAncientBlue, arrThirdStage);
+    const arrThirdStage = createDeckStage(
+        ancientChosenData.thirdStage,
+        colorDecks
+    );
 
-    arrStages = [arrFirstStage, arrSecondStage, arrThirdStage];
+    return [arrFirstStage, arrSecondStage, arrThirdStage];
+}
+
+function createDeckStage(stageData, colorDecks)
+{
+    let arrStage = [];
+
+    fillDeckWithColor(stageData.greenCards, colorDecks.green, arrStage);
+    fillDeckWithColor(stageData.brownCards, colorDecks.brown, arrStage);
+    fillDeckWithColor(stageData.blueCards, colorDecks.blue, arrStage);
+
+    return arrStage;
+}
+
+function fillDeckWithColor(stageCounterColor, deckColor, arrStage) {
+    for (let i = 0; i < stageCounterColor; i++) {
+        let maxIndex = deckColor - 1;
+        let randomIndex = getRandomNumber(0, maxIndex);
+        let card = deckColor.splice(randomIndex, 1);
+        arrStage.push(...card)
+    }
 }
 
 function filterVeryEasyHard(level) {
-    levelGreenCards = findCards(level, greenCardsData);
-    levelBrownCards = findCards(level, brownCardsData);
-    levelBlueCards = findCards(level, blueCardsData);
+    let levelGreenCards = findCards(level, greenCardsData);
+    let levelBrownCards = findCards(level, brownCardsData);
+    let levelBlueCards = findCards(level, blueCardsData);
 
-    green = countCards('greenCards');
-    brown = countCards('brownCards');
-    blue = countCards('blueCards');
+    let green = countCards('greenCards');
+    let brown = countCards('brownCards');
+    let blue = countCards('blueCards');
 
     let levelGreenCardsNormal;
     let levelBrownCardsNormal;
@@ -282,76 +280,78 @@ function filterVeryEasyHard(level) {
     let finalBrownDeck = !levelBrownCardsNormal ? levelBrownCards : [...levelBrownCards, ...levelBrownCardsNormal];
     let finalBlueDeck = !levelBlueCardsNormal ? levelBlueCards : [...levelBlueCards, ...levelBlueCardsNormal];
 
-    createDackAncient(green, finalGreenDeck, dackAncientGreen);
-    createDackAncient(brown, finalBrownDeck, dackAncientBrown);
-    createDackAncient(blue, finalBlueDeck, dackAncientBlue);
+    return {
+        green: createDeckAncient(green, finalGreenDeck),
+        brown: createDeckAncient(brown, finalBrownDeck),
+        blue: createDeckAncient(blue, finalBlueDeck),
+    };
 }
 
 function filterEasyHard(level) {
     let newGreenCardsData = greenCardsData.filter(card => card.difficulty !== level);
     let newBrownCardsData = brownCardsData.filter(card => card.difficulty !== level);
     let newBlueCardsData = blueCardsData.filter(card => card.difficulty !== level);
-    
-    green = countCards('greenCards');
-    brown = countCards('brownCards');
-    blue = countCards('blueCards');
 
-    createDackAncient(green, newGreenCardsData, dackAncientGreen);
-    createDackAncient(brown, newBrownCardsData, dackAncientBrown);
-    createDackAncient(blue, newBlueCardsData, dackAncientBlue);
+    let green = countCards('greenCards');
+    let brown = countCards('brownCards');
+    let blue = countCards('blueCards');
+
+    return {
+        green: createDeckAncient(green, newGreenCardsData),
+        brown: createDeckAncient(brown, newBrownCardsData),
+        blue: createDeckAncient(blue, newBlueCardsData),
+    }
 }
 
-function filterVeryEasyDack() { 
-    filterVeryEasyHard('easy')
-    createDeck();
+function filterVeryEasyDeck() {
+    return filterVeryEasyHard('easy');
 }
 
-function filterEasyDack() {
-    filterEasyHard('hard')
-    createDeck();
+function filterEasyDeck() {
+    return filterEasyHard('hard')
 }
 
 function filterNormalDark() {
-    green = countCards('greenCards');
-    brown = countCards('brownCards');
-    blue = countCards('blueCards');
+    let green = countCards('greenCards');
+    let brown = countCards('brownCards');
+    let blue = countCards('blueCards');
 
-    createDackAncient(green, greenCardsData, dackAncientGreen);
-    createDackAncient(brown, brownCardsData, dackAncientBrown);
-    createDackAncient(blue, blueCardsData, dackAncientBlue);
-
-    createDeck();
+    return {
+        green: createDeckAncient(green, greenCardsData),
+        brown: createDeckAncient(brown, brownCardsData),
+        blue: createDeckAncient(blue, blueCardsData),
+    }
 }
 
 function filterHardDark() {
-    filterEasyHard('easy')
-    createDeck();
+    return filterEasyHard('easy')
 }
 
 function filterVeryHardDark() {
-    
-    filterVeryEasyHard('hard')
-    createDeck();
+    return filterVeryEasyHard('hard')
 }
 
 miniDeck.addEventListener('click', showCard)
 
 function showCard() {
+    if (!currentStage) {
+        return
+    }
     if (currentStage.length <= 0) {
         currentStage = arrStages.shift()
     }
     if (!currentStage) {
+        cardShown.style.display = 'none'
         return
     }
-    console.log(arrFirstStage, arrSecondStage, arrThirdStage);
-
+    
     let maxIndex = currentStage.length - 1;
     let randomIndex = getRandomNumber(0, maxIndex);
-    let сard = currentStage.splice(randomIndex, 1);
-    
-    console.log(сard[0].color);
-    
-    cardShown.src = сard[0].cardFace;
+    let card = currentStage.splice(randomIndex, 1);
+
+    console.log(card[0].color);
+
+    cardShown.src = card[0].cardFace;
     cardShown.style.display = 'inline-block';
 
     let counterIgreen = document.querySelector('[data-id="I-green"]');
@@ -366,19 +366,19 @@ function showCard() {
     let counterIIIbrown = document.querySelector('[data-id="III-brown"]');
     let counterIIIblue = document.querySelector('[data-id="III-blue"]');
 
-    if (сard[0].color === 'green') {
+    if (card[0].color === 'green') {
         if (counterIgreen.textContent !== '0') {
             let num = Number(counterIgreen.textContent) - 1;
-            counterIgreen.textContent = num; 
+            counterIgreen.textContent = num;
         } else if (counterIIgreen.textContent !== '0') {
             let num = Number(counterIIgreen.textContent) - 1;
-            counterIIgreen.textContent = num; 
+            counterIIgreen.textContent = num;
         } else if (counterIIIgreen.textContent !== '0') {
             let num = Number(counterIIIgreen.textContent) - 1;
-            counterIIIgreen.textContent = num; 
+            counterIIIgreen.textContent = num;
         }
     }
-    if (сard[0].color === 'brown') {
+    if (card[0].color === 'brown') {
         if (counterIbrown.textContent !== '0') {
             let num = Number(counterIbrown.textContent) - 1;
             counterIbrown.textContent = num;
@@ -390,42 +390,48 @@ function showCard() {
             counterIIIbrown.textContent = num;
         }
     }
-    if (сard[0].color === 'blue') {
+    if (card[0].color === 'blue') {
         if (counterIblue.textContent !== '0') {
             let num = Number(counterIblue.textContent) - 1;
-            counterIblue.textContent = num; 
+            counterIblue.textContent = num;
         } else if (counterIIblue.textContent !== '0') {
             let num = Number(counterIIblue.textContent) - 1;
-            counterIIblue.textContent = num; 
+            counterIIblue.textContent = num;
         } else if (counterIIIblue.textContent !== '0') {
             let num = Number(counterIIIblue.textContent) - 1;
-            counterIIIblue.textContent = num; 
+            counterIIIblue.textContent = num;
         }
     }
 }
 
 function shuffleDeck(level) {
-    
-    switch(level) {
-        case 'very-easy': 
-            console.log(level);
-            filterVeryEasyDack();
+    console.log(level);
+
+    let colorDecks = {
+        green: [],
+        brown: [],
+        blue: [],
+    };
+
+    switch (level) {
+        case 'very-easy':
+            colorDecks = filterVeryEasyDeck();
             break;
-        case 'easy': 
-            console.log('easy');
-            filterEasyDack();
+        case 'easy':
+            colorDecks = filterEasyDeck();
             break;
-        case 'normal': 
-            console.log('normal');
-            filterNormalDark()
+        case 'normal':
+            colorDecks = filterNormalDark()
             break;
-        case 'hard': 
-            console.log('hard');
-            filterHardDark()
+        case 'hard':
+            colorDecks = filterHardDark()
             break;
-        case 'very-hard': 
-            console.log('very-hard');
-            filterVeryHardDark()
+        case 'very-hard':
+            colorDecks = filterVeryHardDark()
             break;
-    } 
+    }
+
+    arrStages = createDeck(colorDecks);
+
+    console.log(arrStages);
 }

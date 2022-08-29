@@ -38,7 +38,7 @@ body {
     cursor: pointer;
     margin-top: 10px;
 }
-.level-buton-active {
+.level-button-active {
     color: white;
     background-color: rgb(103, 103, 103);
 }
