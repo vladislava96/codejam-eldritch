@@ -2,10 +2,34 @@ body {
     background-image: url('./assets/home.png');
     background-repeat: no-repeat;
     background-size: 100%;
+    background-color: rgb(3, 6, 11);
 }
 
+.instruction {
+    text-align: center;
+    color: rgb(237, 172, 172);
+    background-color: rgba(12, 13, 15, 0.7);
+    letter-spacing: 2px;
+}
+
+
+.about-levels {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    background-color: rgba(12, 13, 15, 0.8);
+    color: rgb(237, 172, 172);
+    letter-spacing: 2px;
+    margin-top: 20px;
+}
+.about-levels div {
+    padding: 5px;
+    width: 280px;
+    border: solid 1px rgb(237, 172, 172);
+}
 .table {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
     align-items: center;
     width: 100%;
